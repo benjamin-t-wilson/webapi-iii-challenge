@@ -16,7 +16,7 @@ db.insert(newUser)
 })
 });
 
-router.post('/:id/posts', validatePost, (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
     const newPost = req.body;
     newPost.user_id = req.params.id;
 postDb.insert(newPost)
@@ -38,8 +38,14 @@ db.get()
     })
 });
 
-router.get('/:id', (req, res) => {
-
+router.get('/:id', validateUserId, (req, res) => {
+    db.getById(req.params.id)
+    .then(user => {
+        res.status(200).json(user)
+    })
+    .catch(err => {
+        res.status(500).json({message: "Error retrieving user", err})
+    })
 });
 
 router.get('/:id/posts', (req, res) => {
@@ -59,12 +65,12 @@ router.put('/:id', (req, res) => {
 function validateUserId(req, res, next) {
     const { id } = req.params;
     db.getById(id)
-      .then(post => {
-        post
-          ? ((req.post = post), next())
+      .then(user => {
+        user
+          ? ((req.user = user), next())
           : res
               .status(404)
-              .json({ message: `Post with id ${id} could not be found` });
+              .json({ message: `User with id ${id} could not be found` });
       })
       .catch(err => {
         res.status(500).json({ message: "Error retrieving data", error });
