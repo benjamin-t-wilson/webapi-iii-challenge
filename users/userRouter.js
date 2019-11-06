@@ -16,8 +16,16 @@ db.insert(newUser)
 })
 });
 
-router.post('/:id/posts', (req, res) => {
-
+router.post('/:id/posts', validatePost, (req, res) => {
+    const newPost = req.body;
+    newPost.user_id = req.params.id;
+postDb.insert(newPost)
+.then(post => {
+    res.status(201).json(post)
+})
+.catch(err => {
+    res.status(500).json({message: "Error creating new post", err})
+})
 });
 
 router.get('/', (req, res) => {
